@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import styled from "styled-components";
+import { useContextSelector } from "use-context-selector";
 import { ITransaction } from "../@types/TransactionsTypes";
 import { transactionsAPI } from "../api/TransactionsAPI";
 
@@ -47,7 +48,10 @@ const PriceHighlight = styled.span<PriceHighlightProps>`
 `;
 
 export function Transactions() {
-  const { transactions } = useContext(TransactionsContext);
+  const transactions = useContextSelector(
+    TransactionsContext,
+    (context) => context.transactions
+  );
   return (
     <>
       <Header></Header>

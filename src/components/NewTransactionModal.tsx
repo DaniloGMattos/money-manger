@@ -9,6 +9,7 @@ import styled from "styled-components";
 
 import { TransactionsContext } from "../contexts/TransactionsContext";
 import { useContext } from "react";
+import { useContextSelector } from "use-context-selector";
 
 const Overlay = styled(Dialog.Overlay)`
   position: fixed;
@@ -140,7 +141,10 @@ export function NewTransactionModal() {
   } = useForm<newTransactionType>({
     resolver: zodResolver(newTransactionSchema),
   });
-  const { createTransaction } = useContext(TransactionsContext);
+  const createTransaction = useContextSelector(
+    TransactionsContext,
+    (context) => context.createTransaction
+  );
 
   async function handleCreateTransactions(data: newTransactionType) {
     await createTransaction(data);
