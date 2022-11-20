@@ -1,8 +1,14 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import * as RadioGroup from "@radix-ui/react-radio-group";
 import { ArrowCircleDown, ArrowCircleUp, X } from "phosphor-react";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm } from "react-hook-form";
 
 import styled from "styled-components";
+
+import { TransactionsContext } from "../contexts/TransactionsContext";
+import { useContext } from "react";
 
 const Overlay = styled(Dialog.Overlay)`
   position: fixed;
@@ -48,7 +54,11 @@ const Content = styled(Dialog.Content)`
       padding: 0 1.25rem;
       border-radius: 6px;
       margin-top: 1.5rem;
-      &:hover {
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      &:not(:disabled):hover {
         transition: background-color 0.2s;
         color: ${(props) => props.theme.white};
         background: ${(props) => props.theme["green-700"]};
@@ -111,7 +121,31 @@ const TransactionTypeButton = styled(
     }
   }
 `;
+const newTransactionSchema = z.object({
+  type: z.enum(["income", "outcome"]),
+  price: z.number(),
+  description: z.string(),
+  category: z.string(),
+});
+
+type newTransactionType = z.infer<typeof newTransactionSchema>;
+
 export function NewTransactionModal() {
+  const {
+    register,
+    control,
+    reset,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = useForm<newTransactionType>({
+    resolver: zodResolver(newTransactionSchema),
+  });
+  const { createTransaction } = useContext(TransactionsContext);
+
+  async function handleCreateTransactions(data: newTransactionType) {
+    await createTransaction(data);
+    reset();
+  }
   return (
     <Dialog.Portal>
       <Overlay>
@@ -120,21 +154,51 @@ export function NewTransactionModal() {
           <Close>
             <X />
           </Close>
-          <form action="">
-            <input type="text" name="" id="" placeholder="Descrição" required />
-            <input type="number" name="" id="" placeholder="Preço" required />
-            <input type="text" name="" id="" placeholder="Categoria" required />
-            <TransactionType>
-              <TransactionTypeButton value="income" variant="income">
-                <ArrowCircleUp size={24} />
-                Entrada
-              </TransactionTypeButton>
-              <TransactionTypeButton value="outcome" variant="outcome">
-                <ArrowCircleDown size={24} />
-                Saída
-              </TransactionTypeButton>
-            </TransactionType>
-            <button type="submit">Cadastrar</button>
+          <form onSubmit={handleSubmit(handleCreateTransactions)}>
+            <input
+              type="text"
+              {...register("description")}
+              placeholder="Descrição"
+              required
+            />
+            <input
+              type="number"
+              {...register("price", { valueAsNumber: true })}
+              placeholder="Preço"
+              required
+            />
+            <input
+              type="text"
+              {...register("category")}
+              placeholder="Categoria"
+              required
+            />
+
+            <Controller
+              control={control}
+              name="type"
+              render={({ field }) => {
+                return (
+                  <TransactionType
+                    onValueChange={field.onChange}
+                    value={field.value}
+                  >
+                    <TransactionTypeButton value="income" variant="income">
+                      <ArrowCircleUp size={24} />
+                      Entrada
+                    </TransactionTypeButton>
+                    <TransactionTypeButton value="outcome" variant="outcome">
+                      <ArrowCircleDown size={24} />
+                      Saída
+                    </TransactionTypeButton>
+                  </TransactionType>
+                );
+              }}
+            />
+
+            <button type="submit" disabled={isSubmitting}>
+              Cadastrar
+            </button>
           </form>
         </Content>
       </Overlay>
