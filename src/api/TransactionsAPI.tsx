@@ -4,7 +4,9 @@ import { Config } from "../../config";
 import { nanoid } from "nanoid";
 async function getTransactions(q?: string): Promise<ITransaction[]> {
   const response = await fetch(
-    `${Config.SERVER_URL}/transactions?q=${q || ""}`,
+    `${Config.SERVER_URL}/transactions?q=${
+      q || ""
+    }&_sort=createdAt&_order=desc`,
     {
       method: "GET",
       headers: {

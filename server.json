@@ -16,14 +16,7 @@
       "price": 50,
       "createdAt": "2022-11-20T02:58:13.647Z"
     },
-    {
-      "type": "outcome",
-      "price": 2000,
-      "description": "JS Expert",
-      "category": "Compra",
-      "createdAt": "2022-11-20T13:51:34.583Z",
-      "id": 3
-    },
+    
     {
       "type": "outcome",
       "price": 2000,
